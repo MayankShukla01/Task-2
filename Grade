@@ -1,0 +1,94 @@
+'''This script does the following:
+
+1) Imports necessary modules: The tkinter module for the GUI and messagebox for error messages.
+2) Defines a GradeManager class: This class manages the UI and grade-related functionalities.
+3) Sets up the UI: The setup_ui() method creates and places widgets (labels, entries, buttons, and result label) in the window using
+ the grid layout manager.
+4) Handles grade addition: The add_grade() method adds a subject and its corresponding grade to a list if the grade is valid.
+5) Calculates the average grade: The calculate_average() method calculates the average grade, determines the letter grade and GPA,
+ and displays the result.
+6) Converts average to letter grade and GPA: The get_letter_grade() and get_gpa() methods handle the conversion.'''
+
+import tkinter as tk
+from tkinter import messagebox
+
+class GradeManager:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Student Grade Manager")
+
+        self.grades = []
+
+        self.setup_ui()
+
+    def setup_ui(self):
+        tk.Label(self.root, text="Subject:").grid(row=0, column=0, padx=10, pady=5)
+        self.subject_entry = tk.Entry(self.root)
+        self.subject_entry.grid(row=0, column=1, padx=10, pady=5)
+
+        tk.Label(self.root, text="Grade:").grid(row=1, column=0, padx=10, pady=5)
+        self.grade_entry = tk.Entry(self.root)
+        self.grade_entry.grid(row=1, column=1, padx=10, pady=5)
+
+        self.add_button = tk.Button(self.root, text="Add Grade", command=self.add_grade)
+        self.add_button.grid(row=2, column=0, columnspan=2, padx=10, pady=5)
+
+        self.calculate_button = tk.Button(self.root, text="Calculate Average", command=self.calculate_average)
+        self.calculate_button.grid(row=3, column=0, columnspan=2, padx=10, pady=5)
+
+        self.result_label = tk.Label(self.root, text="Average Grade: ")
+        self.result_label.grid(row=4, column=0, columnspan=2, padx=10, pady=5)
+
+    def add_grade(self):
+        subject = self.subject_entry.get()
+        try:
+            grade = float(self.grade_entry.get())
+            if 0 <= grade <= 100:
+                self.grades.append((subject, grade))
+                self.subject_entry.delete(0, tk.END)
+                self.grade_entry.delete(0, tk.END)
+                messagebox.showinfo("Success", f"Added grade for {subject}: {grade}")
+            else:
+                messagebox.showerror("Error", "Grade must be between 0 and 100")
+        except ValueError:
+            messagebox.showerror("Error", "Invalid grade. Please enter a number.")
+
+    def calculate_average(self):
+        if not self.grades:
+            messagebox.showerror("Error", "No grades entered.")
+            return
+
+        total = sum(grade for subject, grade in self.grades)
+        average = total / len(self.grades)
+        letter_grade = self.get_letter_grade(average)
+        gpa = self.get_gpa(letter_grade)
+
+        result_text = f"Average Grade: {average:.2f}\nLetter Grade: {letter_grade}\nGPA: {gpa:.2f}"
+        self.result_label.config(text=result_text)
+
+    def get_letter_grade(self, average):
+        if average >= 90:
+            return 'A'
+        elif average >= 80:
+            return 'B'
+        elif average >= 70:
+            return 'C'
+        elif average >= 60:
+            return 'D'
+        else:
+            return 'F'
+
+    def get_gpa(self, letter_grade):
+        letter_to_gpa = {
+            'A': 10.0,
+            'B': 8.5,
+            'C': 7.0,
+            'D': 6.0,
+            'F': 5.0
+        }
+        return letter_to_gpa[letter_grade]
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = GradeManager(root)
+    root.mainloop()
